@@ -1,73 +1,99 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
-export function FormularioRegistro() {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const TEL_REGEX = /^\+?\d{7,15}$/
 
-    // 1. Declaración Centralizada: Un solo hook inicializado con un objeto
-    const [formulario, setFormulario] = useState({
-        nombre: "",
-        correo: "",
-        password: "",
-        telefono: ""
-    });
+export function FormularioRegistro({ onConfirmacion }) {
+  const [formulario, setFormulario] = useState({
+    nombre: '',
+    correo: '',
+    password: '',
+    telefono: '',
+  })
+  const [error, setError] = useState('')
 
-    // 2. La Función Maestra (Sirve para 4 campos o para 40)
-    const manejarCambio = (e) => {
-        // Extraemos el 'name' (qué input escribió) y el 'value' (qué escribió)
-        const { name, value } = e.target;
+  const manejarCambio = (evento) => {
+    const { name, value } = evento.target
+    setFormulario((previo) => ({
+      ...previo,
+      [name]: value,
+    }))
+  }
 
-        setFormulario({
-            ...formulario,    // Operador Spread: "Copia todo lo que ya estaba"
-            [name]: value     // Llave dinámica: "Sobrescribe solo el campo que cambió"
-        });
-    };
+  const validarTipos = () => {
+    if (formulario.nombre.trim().length < 3) {
+      return 'El nombre debe tener al menos 3 caracteres.'
+    }
 
-    const enviar = (e) => {
-        e.preventDefault();
-        console.log("Enviando Objeto Completo:", formulario);
-    };
+    if (!EMAIL_REGEX.test(formulario.correo)) {
+      return 'Ingresá un correo válido.'
+    }
 
-    return (
-        <form onSubmit={enviar} style={{ padding: '20px', border: '1px solid blue' }}>
-            <h3>Registro (+3 Estados)</h3>
+    if (formulario.password.length < 8) {
+      return 'La contraseña debe tener mínimo 8 caracteres.'
+    }
 
-            {/* 3. Conexión limpia. El atributo 'name' ES OBLIGATORIO y debe ser igual a la llave del estado */}
-            <input
-                type="text"
-                name="nombre"
-                value={formulario.nombre}
-                onChange={manejarCambio}
-                placeholder="Nombre Completo"
-            />
-            <br /><br />
+    if (!TEL_REGEX.test(formulario.telefono)) {
+      return 'Ingresá un teléfono válido (7 a 15 dígitos).'
+    }
 
-            <input
-                type="email"
-                name="correo"
-                value={formulario.correo}
-                onChange={manejarCambio}
-                placeholder="Correo"
-            />
-            <br /><br />
+    return ''
+  }
 
-            <input
-                type="password"
-                name="password"
-                value={formulario.password}
-                onChange={manejarCambio}
-                placeholder="Contraseña"
-            />
-            <br /><br />
+  const enviar = (evento) => {
+    evento.preventDefault()
 
-            <input
-                type="tel"
-                name="telefono"
-                value={formulario.telefono}
-                onChange={manejarCambio}
-                placeholder="Teléfono"
-            />
-            <br /><br />
+    const mensajeError = validarTipos()
+    setError(mensajeError)
 
-            <button type="submit">Registrar Usuario</button>
-        </form>
-    );
+    if (mensajeError) {
+      return
+    }
+
+    console.log('Registro silencioso:', formulario)
+    onConfirmacion('Registro confirmado. Usuario creado con éxito.')
+    setFormulario({ nombre: '', correo: '', password: '', telefono: '' })
+  }
+
+  return (
+    <form className="formulario" onSubmit={enviar} noValidate>
+      <h3>Register</h3>
+
+      <input
+        type="text"
+        name="nombre"
+        value={formulario.nombre}
+        onChange={manejarCambio}
+        placeholder="Nombre completo"
+      />
+
+      <input
+        type="email"
+        name="correo"
+        value={formulario.correo}
+        onChange={manejarCambio}
+        placeholder="Correo"
+      />
+
+      <input
+        type="password"
+        name="password"
+        value={formulario.password}
+        onChange={manejarCambio}
+        placeholder="Contraseña"
+      />
+
+      <input
+        type="tel"
+        name="telefono"
+        value={formulario.telefono}
+        onChange={manejarCambio}
+        placeholder="Teléfono"
+      />
+
+      {error && <p className="error">{error}</p>}
+
+      <button type="submit">Registrar</button>
+    </form>
+  )
 }

@@ -1,12 +1,7 @@
-import { FormularioRegistro } from "./components/FormularioRegistro"
-
+import { HomePage } from './pages/HomePage'
 
 const App = () => {
-  return (
-    <div>
-      <FormularioRegistro />
-    </div>
-  )
+  return <HomePage />
 }
 
 export default App

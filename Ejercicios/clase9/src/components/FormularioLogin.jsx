@@ -1,17 +1,69 @@
-export function FormularioLogin() {
-  // 1. Declaración Centralizada: Un solo hook inicializado con un objeto
-    const procesarFormulario = (e) => {
-        // 1. OBLIGATORIO: Detiene la recarga de la página
-        e.preventDefault();
-        // 2. Aquí iría la lógica para enviar los datos a la base de datos (fetch/axios)
-        console.log("Enviando datos al servidor de forma silenciosa...");
-    };
+import { useState } from 'react'
 
-    return (
-        <form onSubmit={procesarFormulario}>
-            <input type="email" placeholder="Correo" required />
-            <input type="password" placeholder="Contraseña" required />
-            <button type="submit">Ingresar</button>
-        </form>
-    );
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export function FormularioLogin({ onConfirmacion }) {
+  const [formulario, setFormulario] = useState({
+    correo: '',
+    password: '',
+  })
+  const [error, setError] = useState('')
+
+  const manejarCambio = (evento) => {
+    const { name, value } = evento.target
+    setFormulario((previo) => ({ ...previo, [name]: value }))
+  }
+
+  const validarTipos = () => {
+    if (!EMAIL_REGEX.test(formulario.correo)) {
+      return 'Ingresá un correo válido.'
+    }
+
+    if (formulario.password.length < 6) {
+      return 'La contraseña debe tener mínimo 6 caracteres.'
+    }
+
+    return ''
+  }
+
+  const procesarFormulario = (evento) => {
+    evento.preventDefault()
+
+    const mensajeError = validarTipos()
+    setError(mensajeError)
+
+    if (mensajeError) {
+      return
+    }
+
+    console.log('Login silencioso:', formulario)
+    onConfirmacion('Login confirmado. Bienvenido/a a la fanpage.')
+    setFormulario({ correo: '', password: '' })
+  }
+
+  return (
+    <form className="formulario" onSubmit={procesarFormulario} noValidate>
+      <h3>Login</h3>
+
+      <input
+        type="email"
+        name="correo"
+        placeholder="Correo"
+        value={formulario.correo}
+        onChange={manejarCambio}
+      />
+
+      <input
+        type="password"
+        name="password"
+        placeholder="Contraseña"
+        value={formulario.password}
+        onChange={manejarCambio}
+      />
+
+      {error && <p className="error">{error}</p>}
+
+      <button type="submit">Ingresar</button>
+    </form>
+  )
 }
